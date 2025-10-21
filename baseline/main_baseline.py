@@ -281,4 +281,4 @@ for epoch in range(epochs):
 print("Total training and evaluation time: ", (time.time() - whole_train_eval_time))
 
 # Save results and Save model
-torch.save(model,"results/finetunedmodel")
+# torch.save(model,"results/finetunedmodel")
