@@ -1,12 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=bertmodel-baseline
+#SBATCH -J bert-baseline
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=64G
 #SBATCH --gres=gpu:a100:1
-#SBATCH --time=01:00:00
-
+#SBATCH --mem=32G
+#SBATCH --time=02:00:00
  
 
 # Archivo de requirements
@@ -30,6 +29,7 @@ while IFS= read -r package || [ -n "$package" ]; do
         echo "Ya está instalado: $package"
     fi
 done < "$REQ_FILE"
+
 
 echo "Ejecutando main_baseline.py"
 

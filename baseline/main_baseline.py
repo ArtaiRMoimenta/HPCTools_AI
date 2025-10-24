@@ -77,6 +77,12 @@ print("Passage: ",train_texts[0])
 print("Query: ",train_queries[0])
 print("Answer: ",train_answers[0])
 
+print("Dimensión de los datos de validación")
+print("--------------------------------")
+print(len(val_texts))
+print(len(val_queries))
+print(len(val_answers))
+
 print("Salidas val data")
 print("--------------------------------")
 print("Passage: ",val_texts[0])  
@@ -186,17 +192,26 @@ train_dataset = SquadDataset(train_encodings)
 val_dataset = SquadDataset(val_encodings)
     
 # Use data loader
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
+batch_size= 16
+train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size, shuffle=True)
 
 # Select GPU
 device = torch.device('cuda' if torch.cuda.is_available()
                       else 'cpu')
+if device.type == 'cuda':
+	print(f"Usando la GPU: {torch.cuda.get_device_name(0)}")
 
 # Build the BERT model. Optimizer, learning rate and epoch
+lr=5e-5
 model = BertForQuestionAnswering.from_pretrained('bert-base-uncased').to(device)
-optim = AdamW(model.parameters(), lr=2e-5)
-epochs = 1
+optim = AdamW(model.parameters(), lr)
+epochs = 2
+
+print("#########Parámetros usados#########")
+print(f"Epoch training:{epochs}")
+print(f"Batch size: {batch_size}")
+print(f"Learning rate: {lr}")
 
 # Train and Evaluate Model
 whole_train_eval_time = time.time()

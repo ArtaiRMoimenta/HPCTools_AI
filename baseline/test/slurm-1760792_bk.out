@@ -1,0 +1,358 @@
+slurmstepd: info: Setting TMPDIR to /scratch/1760792. Previous errors about TMPDIR can be discarded
+Ya está instalado: transformers
+Ejecutando main_baseline.py
+2025-10-22 14:29:15.207690: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-10-22 14:29:15.261712: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-10-22 14:29:17.317754: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Some weights of BertForQuestionAnswering were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['qa_outputs.bias', 'qa_outputs.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Dimensión de los datos de entrenamiento
+--------------------------------
+86821
+86821
+86821
+Salidas train data
+--------------------------------
+Passage:  Beyoncé Giselle Knowles-Carter (/biːˈjɒnseɪ/ bee-YON-say) (born September 4, 1981) is an American singer, songwriter, record producer and actress. Born and raised in Houston, Texas, she performed in various singing and dancing competitions as a child, and rose to fame in the late 1990s as lead singer of R&B girl-group Destiny's Child. Managed by her father, Mathew Knowles, the group became one of the world's best-selling girl groups of all time. Their hiatus saw the release of Beyoncé's debut album, Dangerously in Love (2003), which established her as a solo artist worldwide, earned five Grammy Awards and featured the Billboard Hot 100 number-one singles "Crazy in Love" and "Baby Boy".
+Query:  When did Beyonce start becoming popular?
+Answer:  {'text': 'in the late 1990s', 'answer_start': 269}
+Salidas val data
+--------------------------------
+Passage:  The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse ("Norman" comes from "Norseman") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.
+Query:  In what country is Normandy located?
+Answer:  {'text': 'France', 'answer_start': 159}
+------------------------------
+Tokenizer data
+10
+16
+Usando la GPU: NVIDIA A100-PCIE-40GB
+############Train############
+Batch 1000 / 86821 
+Loss: 2.7 
+
+Batch 2000 / 86821 
+Loss: 1.7 
+
+Batch 3000 / 86821 
+Loss: 2.3 
+
+Batch 4000 / 86821 
+Loss: 2.8 
+
+Batch 5000 / 86821 
+Loss: 0.5 
+
+Batch 6000 / 86821 
+Loss: 0.1 
+
+Batch 7000 / 86821 
+Loss: 3.0 
+
+Batch 8000 / 86821 
+Loss: 2.0 
+
+Batch 9000 / 86821 
+Loss: 0.3 
+
+Batch 10000 / 86821 
+Loss: 3.0 
+
+Batch 11000 / 86821 
+Loss: 0.0 
+
+Batch 12000 / 86821 
+Loss: 0.9 
+
+Batch 13000 / 86821 
+Loss: 0.5 
+
+Batch 14000 / 86821 
+Loss: 0.5 
+
+Batch 15000 / 86821 
+Loss: 2.2 
+
+Batch 16000 / 86821 
+Loss: 2.0 
+
+Batch 17000 / 86821 
+Loss: 0.2 
+
+Batch 18000 / 86821 
+Loss: 1.6 
+
+Batch 19000 / 86821 
+Loss: 0.3 
+
+Batch 20000 / 86821 
+Loss: 0.3 
+
+Batch 21000 / 86821 
+Loss: 2.8 
+
+Batch 22000 / 86821 
+Loss: 0.6 
+
+Batch 23000 / 86821 
+Loss: 0.5 
+
+Batch 24000 / 86821 
+Loss: 0.4 
+
+Batch 25000 / 86821 
+Loss: 2.3 
+
+Batch 26000 / 86821 
+Loss: 0.2 
+
+Batch 27000 / 86821 
+Loss: 0.9 
+
+Batch 28000 / 86821 
+Loss: 0.2 
+
+Batch 29000 / 86821 
+Loss: 0.7 
+
+Batch 30000 / 86821 
+Loss: 1.1 
+
+Batch 31000 / 86821 
+Loss: 0.3 
+
+Batch 32000 / 86821 
+Loss: 0.0 
+
+Batch 33000 / 86821 
+Loss: 4.1 
+
+Batch 34000 / 86821 
+Loss: 0.6 
+
+Batch 35000 / 86821 
+Loss: 4.7 
+
+Batch 36000 / 86821 
+Loss: 1.7 
+
+Batch 37000 / 86821 
+Loss: 5.3 
+
+Batch 38000 / 86821 
+Loss: 1.9 
+
+Batch 39000 / 86821 
+Loss: 0.1 
+
+Batch 40000 / 86821 
+Loss: 3.4 
+
+Batch 41000 / 86821 
+Loss: 2.6 
+
+Batch 42000 / 86821 
+Loss: 0.1 
+
+Batch 43000 / 86821 
+Loss: 4.1 
+
+Batch 44000 / 86821 
+Loss: 0.7 
+
+Batch 45000 / 86821 
+Loss: 0.4 
+
+Batch 46000 / 86821 
+Loss: 0.5 
+
+Batch 47000 / 86821 
+Loss: 0.1 
+
+Batch 48000 / 86821 
+Loss: 3.3 
+
+Batch 49000 / 86821 
+Loss: 0.6 
+
+Batch 50000 / 86821 
+Loss: 0.3 
+
+Batch 51000 / 86821 
+Loss: 0.7 
+
+Batch 52000 / 86821 
+Loss: 1.4 
+
+Batch 53000 / 86821 
+Loss: 0.1 
+
+Batch 54000 / 86821 
+Loss: 0.2 
+
+Batch 55000 / 86821 
+Loss: 2.3 
+
+Batch 56000 / 86821 
+Loss: 0.1 
+
+Batch 57000 / 86821 
+Loss: 0.2 
+
+Batch 58000 / 86821 
+Loss: 0.5 
+
+Batch 59000 / 86821 
+Loss: 0.4 
+
+Batch 60000 / 86821 
+Loss: 1.0 
+
+Batch 61000 / 86821 
+Loss: 1.3 
+
+Batch 62000 / 86821 
+Loss: 1.4 
+
+Batch 63000 / 86821 
+Loss: 0.3 
+
+Batch 64000 / 86821 
+Loss: 0.6 
+
+Batch 65000 / 86821 
+Loss: 7.3 
+
+Batch 66000 / 86821 
+Loss: 0.1 
+
+Batch 67000 / 86821 
+Loss: 0.4 
+
+Batch 68000 / 86821 
+Loss: 0.0 
+
+Batch 69000 / 86821 
+Loss: 2.4 
+
+Batch 70000 / 86821 
+Loss: 1.9 
+
+Batch 71000 / 86821 
+Loss: 0.5 
+
+Batch 72000 / 86821 
+Loss: 0.8 
+
+Batch 73000 / 86821 
+Loss: 0.1 
+
+Batch 74000 / 86821 
+Loss: 1.5 
+
+Batch 75000 / 86821 
+Loss: 1.6 
+
+Batch 76000 / 86821 
+Loss: 0.2 
+
+Batch 77000 / 86821 
+Loss: 3.2 
+
+Batch 78000 / 86821 
+Loss: 1.2 
+
+Batch 79000 / 86821 
+Loss: 0.6 
+
+Batch 80000 / 86821 
+Loss: 0.5 
+
+Batch 81000 / 86821 
+Loss: 3.0 
+
+Batch 82000 / 86821 
+Loss: 1.2 
+
+Batch 83000 / 86821 
+Loss: 0.1 
+
+Batch 84000 / 86821 
+Loss: 0.3 
+
+Batch 85000 / 86821 
+Loss: 5.8 
+
+Batch 86000 / 86821 
+Loss: 4.2 
+
+############Evaluate############
+Batch 1000 / 20302 
+Loss: 0.7 
+
+Batch 2000 / 20302 
+Loss: 5.5 
+
+Batch 3000 / 20302 
+Loss: 2.6 
+
+Batch 4000 / 20302 
+Loss: 0.0 
+
+Batch 5000 / 20302 
+Loss: 0.2 
+
+Batch 6000 / 20302 
+Loss: 0.8 
+
+Batch 7000 / 20302 
+Loss: 0.7 
+
+Batch 8000 / 20302 
+Loss: 0.3 
+
+Batch 9000 / 20302 
+Loss: 1.3 
+
+Batch 10000 / 20302 
+Loss: 2.7 
+
+Batch 11000 / 20302 
+Loss: 0.2 
+
+Batch 12000 / 20302 
+Loss: 0.4 
+
+Batch 13000 / 20302 
+Loss: 0.9 
+
+Batch 14000 / 20302 
+Loss: 1.2 
+
+Batch 15000 / 20302 
+Loss: 0.5 
+
+Batch 16000 / 20302 
+Loss: 0.1 
+
+Batch 17000 / 20302 
+Loss: 0.4 
+
+Batch 18000 / 20302 
+Loss: 0.5 
+
+Batch 19000 / 20302 
+Loss: 0.1 
+
+Batch 20000 / 20302 
+Loss: 0.7 
+
+
+-------Epoch  1 -------
+Training Loss: nan 
+Validation Loss: nan 
+Time:  3205.6606097221375 
+----------------------- 
+
+
+Total training and evaluation time:  3205.660625219345
