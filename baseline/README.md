@@ -1,4 +1,4 @@
-# LAB IA - HPCTools
+# LAB IA - HPCTools - Artai Rodríguez Moimenta
 
 ## Introducción
 
@@ -37,15 +37,21 @@ El tiempo de ejecución reportado se corresponde con una única ejecución. Lo p
 Todos los resultados obtenidos para todas las pruebas se pueden consultar en la carpeta `test` en los ficheros `.out`. En la tabla sólo se muestran los resultados que considero más relevantes. 
 
 
-La primera ejecución se lanzó con los parámetros que por defecto traía la implementación (`baseline_GPUA100_2epoch_8BS.out`) con el dispositivo NVIDIA A100-PCIE-40GB (ver tabla). Comprobé el efecto del batch_size, reduciéndolo de 8 a 1 y aumentándolo a 16. Para un batch_size de 1 y 2 epochs el tiempo de ejecución fué de 6460.94 s. 
+La primera ejecución se lanzó con los parámetros que por defecto traía la implementación (`baseline_GPUA100_2epoch_8BS.out`) con el dispositivo NVIDIA A100-PCIE-40GB (ver tabla). Comprobé el efecto del batch_size, reduciéndolo de 8 a 1 y aumentándolo a 64. Para un batch_size (BS) de 1 y 2 epochs el tiempo de ejecución fué de 6460.94 s frente a los 4108.80 y 3758.40 s para un BS de 8 y 64 respectivamente. Para BS pequeños, la perdida por entrenamiento (training loss) se reduce considerablemente entre épocas sin una disminución equivalente en la pérdida en validación (validation loss) lo que me indica que se puede estar experimentando overfitting. Esto se ve de forma clara para el BS=16 (`baseline_GPUA100_2epoch_16BS.out`) pasando de Training Loss= 1.31/ Validation Loss=1.11 en epoch 1 a Training Loss= 0.81/ Validation Loss=1.19 en epoch 2.
 
-Los primeros test para CPU fallaron por límite de tiempo al emplear batch_sizes muy pequeños que implican muchas más iteraciones por época.
+
+Jugar con el learning-rate (lr) me proporcionó problemas en las salidas del entrenamiento. No tengo claro cómo estará realizada la implementación escogida internamente pero observo que si reduzco mucho este parámetro, las salidas del programan muestran nan en los cómputos de validation/training loss. Por esta razón decido fijar un lr=5e-5 para todos los casos. No se han probado diferentes configuraciones del optimizador, seleccionando AdamW por defecto. 
+
+Los primeros test para CPU fallaron por límite de tiempo/memoria al emplear batch_sizes muy pequeños/grandes respectivamente. He lanzado otras ejecuciones ajustando tiempo y memoria, pero no han entrado en el sistema de colas. Dejo la tabla sin completar en el momento del tag, pero espero poder incluir en breves los resultados de tiempo.  
+
+Las ejecuciones con T4 están resultando complicadas de ejecutar, al no disponer de recursos suficientes en el supercomputador. Me gustaría hacer las comparaciones en igualdad de condiciones, pero si no consigo recursos intentaré reducir la carga de entrenamientos en epochs y batch_size. Dejo la tabla sin completar en el momento del tag, pero espero poder incluir en breves los resultados de tiempo.  
 
 
 
 | Device         | Tiempo total de entrenamiento (s)   | Batch_size |Learning rate| epochs |
 |----------------|---------------------------------|------------|-------------|------------|
 | NVIDIA A100-PCIE-40GB  |   4108.80               |     8      |     5e-5    |      2     |
+| NVIDIA A100-PCIE-40GB  |   3758.40               |     64     |     5e-5    |      2     |
 | 1:CPU          |                                 |            |             |            |
 | 1:T4           |                                 |            |             |            |
 

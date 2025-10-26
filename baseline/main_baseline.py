@@ -192,9 +192,9 @@ train_dataset = SquadDataset(train_encodings)
 val_dataset = SquadDataset(val_encodings)
     
 # Use data loader
-batch_size= 16
-train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size, shuffle=True)
+batch_size= 64
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=64, shuffle=True)
 
 # Select GPU
 device = torch.device('cuda' if torch.cuda.is_available()
