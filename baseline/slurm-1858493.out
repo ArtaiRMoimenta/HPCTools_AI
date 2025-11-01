@@ -1,0 +1,12 @@
+slurmstepd: info: Setting TMPDIR to /scratch/1858493. Previous errors about TMPDIR can be discarded
+Ya está instalado: transformers
+Ejecutando main_baseline.py
+2025-10-27 03:52:03.746703: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-10-27 03:52:06.376416: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-10-27 03:52:11.193079: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Some weights of BertForQuestionAnswering were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['qa_outputs.bias', 'qa_outputs.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 1858493.0 ON smp-20 CANCELLED AT 2025-10-27T11:51:54 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 1858493 ON smp-20 CANCELLED AT 2025-10-27T11:51:54 DUE TO TIME LIMIT ***

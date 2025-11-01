@@ -3,8 +3,8 @@
 #SBATCH -J bert-baseline
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --mem=64G
-#SBATCH --time=08:00:00
+#SBATCH --mem=32G
+#SBATCH --time=12:00:00
 
 # Activate environment
 

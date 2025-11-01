@@ -192,9 +192,9 @@ train_dataset = SquadDataset(train_encodings)
 val_dataset = SquadDataset(val_encodings)
     
 # Use data loader
-batch_size= 64
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=64, shuffle=True)
+batch_size= 32
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
 # Select GPU
 device = torch.device('cuda' if torch.cuda.is_available()
@@ -206,7 +206,7 @@ if device.type == 'cuda':
 lr=5e-5
 model = BertForQuestionAnswering.from_pretrained('bert-base-uncased').to(device)
 optim = AdamW(model.parameters(), lr)
-epochs = 2
+epochs = 1
 
 print("#########Parámetros usados#########")
 print(f"Epoch training:{epochs}")
