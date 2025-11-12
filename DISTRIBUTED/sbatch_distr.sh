@@ -1,14 +1,15 @@
 #!/bin/bash
-#SBATCH --exclusive
 #SBATCH -J bert-baseline
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --mem=32G
-#SBATCH --time=12:00:00
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=2
+#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:a100:2
+#SBATCH --mem=64G
+#SBATCH --time=02:00:00
 
-# Activate environment
+#!/bin/bash
 
-source $STORE/mypython/bin/activate 
+source $STORE/mypython/bin/activate
 
 # Archivo de requirements
 
@@ -33,6 +34,10 @@ while IFS= read -r package || [ -n "$package" ]; do
 done < "$REQ_FILE"
 
 
-echo "Ejecutando main_baseline.py"
+echo "Native Fabric implementation: $1"
+srun python main_distributed_class.py --strategy="deepspeed"
 
-srun python main_baseline.py
+
+
+
+

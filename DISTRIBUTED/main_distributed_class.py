@@ -1,6 +1,7 @@
 # Implementación de alexaapo sacada de https://github.com/alexaapo/BERT-based-pretrained-model-using-SQuAD-2.0-dataset
 
 # Cargar modulos necesarios
+import argparse
 import json
 from pathlib import Path
 import torch
@@ -9,6 +10,15 @@ from torch.optim import AdamW
 import time
 import transformers
 transformers.AdamW = torch.optim.AdamW #En la ultima version de transformers se saco AdamW. La llamamos desde torch  
+from lightning_fabric.fabric import Fabric
+
+ # PAsar strategia por linea de comandos
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--strategy', type=str, default='ddp', help='Distributed strategy for Fabric')
+args = parser.parse_args()
+
+
 
 # Almacenar textos, consultas y respuestas de los archivos .json de entrenamiento (train) y validación (dev). 
 # Guardamos esta información en listas. Copiado directamente de su implementacion
@@ -63,32 +73,6 @@ for group in squad_dict['data']:
 
 val_texts, val_queries, val_answers = texts, queries, answers
 
-# Comprobamos los datos cargados
-
-print("Dimensión de los datos de entrenamiento")
-print("--------------------------------")
-print(len(train_texts))
-print(len(train_queries))
-print(len(train_answers))
-
-print("Salidas train data")
-print("--------------------------------")
-print("Passage: ",train_texts[0])  
-print("Query: ",train_queries[0])
-print("Answer: ",train_answers[0])
-
-print("Dimensión de los datos de validación")
-print("--------------------------------")
-print(len(val_texts))
-print(len(val_queries))
-print(len(val_answers))
-
-print("Salidas val data")
-print("--------------------------------")
-print("Passage: ",val_texts[0])  
-print("Query: ",val_queries[0])
-print("Answer: ",val_answers[0])
-
 # Comentario a la implementacion usada:
 # Because Bert model needs both start and end position characters of the answer, I have to find it and store it for later. 
 # Sometimes, I notice that SQuAD anwers "eat" one or two characters from the real answer in the passage. 
@@ -132,13 +116,17 @@ for answer, text in zip(val_answers, val_texts):
     # When the real answer is more by two characters  
     elif text[start_idx-2:end_idx-2] == real_answer:
         answer['answer_start'] = start_idx - 2
-        answer['answer_end'] = end_idx - 2   
+        answer['answer_end'] = end_idx - 2
+        
+# Inicializamos Fabric
+fabric = Fabric(accelerator="cuda", devices=2, num_nodes=2, strategy=args.strategy)
+fabric.launch()
+
 
 # Preprocesado de los datos para tokenizar 
 # transformers.AdamW = torch.optim.AdamW
 from transformers import AutoTokenizer,BertForQuestionAnswering
-print("------------------------------")
-print("Tokenizer data")
+
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
 train_encodings = tokenizer(train_texts, train_queries, truncation=True, padding=True)
@@ -167,7 +155,6 @@ def add_token_positions(encodings, answers):
         count += 1
         end_positions[-1] = tokenizer.model_max_length
 
-  print(count)
 
   # Update the data in dictionary
   encodings.update({'start_positions': start_positions, 'end_positions': end_positions})
@@ -197,21 +184,23 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
 # Select GPU
-device = torch.device('cuda' if torch.cuda.is_available()
-                      else 'cpu')
-if device.type == 'cuda':
-	print(f"Usando la GPU: {torch.cuda.get_device_name(0)}")
+# device = torch.device('cuda' if torch.cuda.is_available()
+#                      else 'cpu')
+# if device.type == 'cuda':
+	# print(f"Usando la GPU: {torch.cuda.get_device_name(0)}")
 
 # Build the BERT model. Optimizer, learning rate and epoch
 lr=5e-5
-model = BertForQuestionAnswering.from_pretrained('bert-base-uncased').to(device)
+# model = BertForQuestionAnswering.from_pretrained('bert-base-uncased').to(device)
+model = BertForQuestionAnswering.from_pretrained('bert-base-uncased')
 optim = AdamW(model.parameters(), lr)
-epochs = 1
+epochs = 2
 
-print("#########Parámetros usados#########")
-print(f"Epoch training:{epochs}")
-print(f"Batch size: {batch_size}")
-print(f"Learning rate: {lr}")
+
+# Setup con Fabric
+model, optim = fabric.setup(model, optim)
+train_loader = fabric.setup_dataloaders(train_loader)
+val_loader = fabric.setup_dataloaders(val_loader)
 
 # Train and Evaluate Model
 whole_train_eval_time = time.time()
@@ -229,21 +218,28 @@ for epoch in range(epochs):
     
   loss_of_epoch = 0
 
-  print("############Train############")
+  if fabric.is_global_zero:
+      print("############Train############")
 
   for batch_idx,batch in enumerate(train_loader): 
     
     optim.zero_grad()
 
-    input_ids = batch['input_ids'].to(device)
-    attention_mask = batch['attention_mask'].to(device)
-    start_positions = batch['start_positions'].to(device)
-    end_positions = batch['end_positions'].to(device)
+    # input_ids = batch['input_ids'].to(fabric.device)
+    # attention_mask = batch['attention_mask'].to(fabric.device)
+    # start_positions = batch['start_positions'].to(fabric.device)
+    # end_positions = batch['end_positions'].to(fabric.device)
+
+    input_ids = batch['input_ids']
+    attention_mask = batch['attention_mask']
+    start_positions = batch['start_positions']
+    end_positions = batch['end_positions']
     
     outputs = model(input_ids, attention_mask=attention_mask, start_positions=start_positions, end_positions=end_positions)
-    loss = outputs[0]
+    loss = outputs.loss
+    loss = loss.mean()
     # do a backwards pass 
-    loss.backward()
+    fabric.backward(loss)
     # update the weights
     optim.step()
     # Find the total loss
@@ -259,8 +255,8 @@ for epoch in range(epochs):
 
   # Set model in evaluation mode
   model.eval()
-
-  print("############Evaluate############")
+  if fabric.is_global_zero:
+      print("############Evaluate############")
 
   loss_of_epoch = 0
 
@@ -268,13 +264,19 @@ for epoch in range(epochs):
     
     with torch.no_grad():
 
-      input_ids = batch['input_ids'].to(device)
-      attention_mask = batch['attention_mask'].to(device)
-      start_positions = batch['start_positions'].to(device)
-      end_positions = batch['end_positions'].to(device)
+      # input_ids = batch['input_ids'].to(fabric.device)
+      # attention_mask = batch['attention_mask'].to(fabric.device)
+      # start_positions = batch['start_positions'].to(fabric.device)
+      # end_positions = batch['end_positions'].to(fabric.device)
+
+      input_ids = batch['input_ids']
+      attention_mask = batch['attention_mask']
+      start_positions = batch['start_positions']
+      end_positions = batch['end_positions']    
       
       outputs = model(input_ids, attention_mask=attention_mask, start_positions=start_positions, end_positions=end_positions)
-      loss = outputs[0]
+      loss = outputs.loss
+      loss = loss.mean()
       # Find the total loss
       loss_of_epoch += loss.item()
 
@@ -284,8 +286,9 @@ for epoch in range(epochs):
   loss_of_epoch /= len(val_loader)
   val_losses.append(loss_of_epoch)
 
-  # Print each epoch's time and train/val loss 
-  print("\n-------Epoch ", epoch+1,
+  # Print each epoch's time and train/val loss
+  if fabric.is_global_zero:
+      print("\n-------Epoch ", epoch+1,
         "-------"
         "\nTraining Loss:", train_losses[-1],
         "\nValidation Loss:", val_losses[-1],
@@ -293,7 +296,8 @@ for epoch in range(epochs):
         "\n-----------------------",
         "\n\n")
 
-print("Total training and evaluation time: ", (time.time() - whole_train_eval_time))
+if fabric.is_global_zero:
+    print("Total training and evaluation time: ", (time.time() - whole_train_eval_time))
 
 # Save results and Save model
 # torch.save(model,"results/finetunedmodel")
