@@ -194,7 +194,7 @@ lr=5e-5
 # model = BertForQuestionAnswering.from_pretrained('bert-base-uncased').to(device)
 model = BertForQuestionAnswering.from_pretrained('bert-base-uncased')
 optim = AdamW(model.parameters(), lr)
-epochs = 2
+epochs = 5
 
 
 # Setup con Fabric

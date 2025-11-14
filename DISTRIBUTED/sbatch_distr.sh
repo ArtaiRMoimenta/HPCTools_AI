@@ -35,7 +35,7 @@ done < "$REQ_FILE"
 
 
 echo "Native Fabric implementation: $1"
-srun python main_distributed_class.py --strategy="deepspeed"
+srun python main_distributed_class.py --strategy="ddp"
 
 
 
