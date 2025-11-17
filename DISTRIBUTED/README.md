@@ -4,7 +4,7 @@
 
 El objetivo de esta segunda tarea es realizar el entrenamiento distribuído en paralelo con dos NVIDIA A100-PCIE-40GB y distintas estrategias de paralelización. 
 
-Durante el periodo de documentación para la realización de esta segunda parte de la práctica, me he dado cuenta de que la implementación baseline escogida previamente(ver implementación en `main_baseline.py`) no era la mejor opción. Esta implementación ''casera'' está pensada para jugar de forma secuencial con el entrnamiento de modelos BERT y su estructura está realizada directamente en el código principal. Durante el proceso de documentaciṕn para esta segunda parte, me he encontrado con ejemplos de código más funcionales, con implementaciones encapsuladas por clases, lo que resulta más conveniete para este tipo de códigos. Ha sido una mala decisión la elección de la primera implementación en su momento y me hubiese gustado haber esgocido alguna más adecuada para obtener una experiencia más directa y permitirme controlar un poco más las características de la implementación.
+Durante el periodo de documentación para la realización de esta segunda parte de la práctica, me he dado cuenta de que la implementación baseline escogida previamente (ver implementación en `main_baseline.py`) no era la mejor opción. Esta implementación ''casera'' está pensada para jugar de forma secuencial con el entrnamiento de modelos BERT y su estructura está realizada directamente en el código principal. Durante el proceso de documentaciṕn para esta segunda parte, me he encontrado con ejemplos de código más funcionales, con implementaciones encapsuladas por clases, lo que resulta más conveniete para este tipo de códigos. Ha sido una mala decisión la elección de la primera implementación en su momento y me hubiese gustado haber esgocido alguna más adecuada para obtener una experiencia más directa y permitirme controlar un poco más las características de la implementación.
 
 Con todo, y dado el tiempo que puedo dedicar a esete ejericcio, decidí quedarme lo que tengo, modificar las salidas del código para adaptarlo al proceso distribuído y simplemente verificar que la paralelización reporta resultados coherentes. A pesar de todo, no poseeo control sobre lo que está ocurriendo internamente y todo está funcionando como una caja negra para mi. 
 
@@ -16,7 +16,7 @@ El código distribuído se encuentra en `main_distributed_class.py`. Esta implem
 
 Se escogieron como hiperparámetros **batch_size=8**, **learning-rate=5e-5** y **epochs=2** para los dispositivos empleados (**2 NVIDIA A100 GPU**). Se empleó como optimizador el implementado por defecto **AdamW**. Como estrategias de paralelización se probaron `dp`, `ddp`, `fsdp` y `deepspeed`. También se realizó una prueba extra con `ddp` y 5 epochs para verificar si la pérdida en validación mejora o si se experimenta overfitting.
 
-La implementación requiere de la instalación de **transformers** y **deppspeed** para una de las estrategias de paralelización. La instalación se realiza automáticamente en el entorno virtual ejecutando:
+La implementación requiere de la instalación de **transformers** y **deepspeed** para una de las estrategias de paralelización. La instalación se realiza automáticamente en el entorno virtual ejecutando:
 
         #!/bin/bash
         source $STORE/mypython/bin/activate
@@ -37,27 +37,23 @@ Las estrategias de paralelización se deben modificar ''ad hoc'' en el ejecutabl
 
 Todos los resultados obtenidos para todas las pruebas se pueden consultar en la carpeta `test` en los ficheros `.out`. En la tabla sólo se muestran los resultados que considero más relevantes. 
 
+En base a los resultados podemos afirmar que se observa una reducción drásticas en los tiempos de ejecución para las distintas estrategias de paralelización con respecto a la implementación `baseline` con excepción de la estrategia `dp` para la cual no parece observarse un efecto en el tiempo de entrenamiento (ver tabla). `dp` divide el batch entre el número de GPUs y según la documentación [2] no se recominenda su uso si lo que se busca es reducción de tiempos. Entiendo que la reducción del batch no afecta en nuestro caso de forma considerable en los tiempos de entrenamiento y se me ocurre pensar que el overhead que introduce la implementación distribuída no es suficiente para compensar el caso baseline. El resto de estrategias muestran reducciones del orden de 5 veces respecto a baseline lo cual es esperado. `ddp` copia el modelo en cada GPU y divide el dataset en lotes que se reparten para posteriormente sincronizar la información una vez calculao el ''loss'' y los gradientes. Se muestra como la estrategia más eficiente.
 
-La primera ejecución se lanzó con los parámetros que por defecto traía la implementación (`baseline_GPUA100_2epoch_8BS.out`) con el dispositivo NVIDIA A100-PCIE-40GB (ver tabla). Comprobé el efecto del batch_size, reduciéndolo de 8 a 1 y aumentándolo a 64. Para un batch_size (BS) de 1 y 2 epochs el tiempo de ejecución fué de 6460.94 s frente a los 4108.80 y 3758.40 s para un BS de 8 y 64 respectivamente. Para BS pequeños, la perdida por entrenamiento (training loss) se reduce considerablemente entre épocas sin una disminución equivalente en la pérdida en validación (validation loss) lo que me indica que se puede estar experimentando overfitting. Esto se ve de forma clara para el BS=16 (`baseline_GPUA100_2epoch_16BS.out`) pasando de Training Loss= 1.31/ Validation Loss=1.11 en epoch 1 a Training Loss= 0.81/ Validation Loss=1.19 en epoch 2.
-
-
-Jugar con el learning-rate (lr) me proporcionó problemas en las salidas del entrenamiento. No tengo claro cómo estará realizada la implementación escogida internamente pero observo que si reduzco mucho este parámetro, las salidas del programan muestran nan en los cómputos de validation/training loss. Por esta razón decido fijar un lr=5e-5 para todos los casos. No se han probado diferentes configuraciones del optimizador, seleccionando AdamW por defecto. 
-
-Los primeros test para CPU fallaron por límite de tiempo/memoria al emplear batch_sizes muy pequeños/grandes respectivamente. He lanzado otras ejecuciones ajustando tiempo y memoria, pero no han entrado en el sistema de colas. Dejo la tabla sin completar en el momento del tag, pero espero poder incluir en breves los resultados de tiempo.  
-
-Las ejecuciones con T4 están resultando complicadas de ejecutar, al no disponer de recursos suficientes en el supercomputador. Me gustaría hacer las comparaciones en igualdad de condiciones, pero si no consigo recursos intentaré reducir la carga de entrenamientos en epochs y batch_size. Dejo la tabla sin completar en el momento del tag, pero espero poder incluir en breves los resultados de tiempo.  
+Por último he querido verificar ahora wue el tiempo de ejecución es razonable si se obtienen mejoras en l modelo al aumentar el número de epochs. Se lanzó una ejecución con la estrategia más eficiente y con 5 epochs para verificar la pérdida por validación vs entrenamiento. Los resultados muestran (ver `Fabric_epoch5_ddp.out`) que a pesar de que la pérdida por entrenamiento se reduce de 1.60 en la epoch 1 a 0.33 en la epoch 5 no se observa una reducción equivalente en la pérdida por validación, pasando de 1.11 a 1.43 respectivamente. Esto indica que el modelo no puede ser mejorado y que aumentos en el entrenamiento sólo llevarán a un sobreajuste en el entrenamiento sin una mejora equivalente en la validación.
 
 
 
-| Device         | Strategy   | Tiempo total de entrenamiento (s) |
-|----------------|---------------------------------|------------|
-| 2 NVIDIA A100-PCIE-40GB  |   4108.80               |     8      |
-| 2 NVIDIA A100-PCIE-40GB  |   3758.40               |     8     | 
-| 1:CPU          |                                 |            | 
-| 1:T4           |                                 |            | 
+| Device                   | Strategy   | Tiempo total de entrenamiento (s) | epochs| 
+|--------------------------|------------|-----------------------------------|-------|
+| 2 NVIDIA A100-PCIE-40GB  |   dp       |     5251.74                       |   2   | 
+| 2 NVIDIA A100-PCIE-40GB  |   ddp       |     997.45                      |   2   |
+| 2 NVIDIA A100-PCIE-40GB  |   fsdp       |     1046.26                       |   2   |
+| 2 NVIDIA A100-PCIE-40GB  |   deepspeed  |     1073.72                       |   2   |
+| 2 NVIDIA A100-PCIE-40GB  |   ddp  |     2500.92                       |   5   |
+| 2 NVIDIA A100-PCIE-40GB  |   baseline  |     5108.80                       |   2   |
 
 ## Referencias
 
     - [1] https://lightning.ai/docs/fabric/stable/api/fabric_args.html
-    - [2] https://rajpurkar.github.io/SQuAD-explorer/
+    - [2] https://lightning.ai/docs/pytorch/LTS/accelerators/gpu_intermediate.html
     - [3] https://github.com/alexaapo/BERT-based-pretrained-model-using-SQuAD-2.0-dataset
